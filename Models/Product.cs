@@ -7,7 +7,7 @@ public class Product
     public string? Description { get; set; }
     public ushort Price { get; set; }
     public byte Discount { get; set; }
-    public string? SellerId { get; set; }
+    public Guid SellerId { get; set; }
     public Seller? Seller { get; set; }
     public DateTime CreatedAt { get; set; }
     public List<string> ImageUrls { get; set; } = [];
