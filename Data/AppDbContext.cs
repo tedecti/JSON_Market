@@ -1,4 +1,6 @@
 ﻿using JSON_Market.Models;
+using JSON_Market.Models.Order;
+using JSON_Market.Models.Product;
 using Microsoft.EntityFrameworkCore;
 
 namespace JSON_Market.Data;
@@ -27,11 +29,14 @@ public class AppDbContext : DbContext
             p => p.Seller,
             p => p.SellerId,
             DeleteBehavior.Cascade);
-        modelBuilder.Entity<Order>().HasMany(o => o.Products);
+        modelBuilder.Entity<Order>()
+            .HasMany(o => o.Products)
+            .WithMany();
+        ;
     }
 
-    public DbSet<Customer> Customers;
-    public DbSet<Order> Orders;
-    public DbSet<Product> Products;
-    public DbSet<Seller> Sellers;
+    public DbSet<Customer> Customers { get; set; } = default!;
+    public DbSet<Order> Orders { get; set; } = default!;
+    public DbSet<Product> Products { get; set; } = default!;
+    public DbSet<Seller> Sellers { get; set; } = default!;
 }
