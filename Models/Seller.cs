@@ -4,5 +4,5 @@ public class Seller
 {
     public Guid Id { get; set; }
     public string? Name { get; set; }
-    public ICollection<Order> CreatedOrders { get; set; } = [];
+    public ICollection<Product> CreatedProducts { get; set; } = [];
 }
