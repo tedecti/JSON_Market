@@ -1,4 +1,4 @@
-﻿namespace JSON_Market.Models;
+﻿namespace JSON_Market.Models.Customer;
 
 public class Customer
 {
