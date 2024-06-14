@@ -24,6 +24,10 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> GetOrdersByCustomer(Guid customerId)
         {
             var orders = await _orderRepository.GetAllOrdersByCustomerAsync(customerId);
+            if (orders == null)
+            {
+                return NotFound();
+            }
             var ordersMap = _mapper.Map<GetAllOrdersByCustomerDto>(orders);
             return Ok(ordersMap);
         }
@@ -32,6 +36,10 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> GetOrderById(Guid orderId)
         {
             var order = await _orderRepository.GetOrderByIdForResponseAsync(orderId);
+            if (order == null)
+            {
+                return NotFound();
+            }
             var orderMap = _mapper.Map<GetAllOrdersByCustomerDto>(order);
             return Ok(orderMap);
         }
@@ -47,6 +55,10 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> PutOrder(Guid orderId, [FromBody] List<Guid> productIds)
         {
             var order = await _orderRepository.EditOrderAsync(orderId, productIds);
+            if (order == null)
+            {
+                return NotFound();
+            }
             return NoContent();
         }
 
@@ -54,6 +66,10 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> DeleteOrder(Guid orderId)
         {
             var order = await _orderRepository.RemoveOrderAsync(orderId);
+            if (order == null)
+            {
+                return NotFound();
+            }
             return NoContent();
         }
     }

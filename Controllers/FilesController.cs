@@ -35,11 +35,13 @@ namespace JSON_Market.Controllers
                         Mode = ResizeMode.Max
                     })
                 );
-
                 var compressedImageStream = new MemoryStream();
                 image.Save(compressedImageStream, new PngEncoder());
                 compressedImageStream.Seek(0, SeekOrigin.Begin);
-
+                if (image == null)
+                {
+                    return NotFound();
+                }
                 return File(compressedImageStream, "image/png");
             }
         }

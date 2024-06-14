@@ -19,6 +19,11 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> GetAllSellers()
         {
             var sellers = await _entityRepository.GetAllSellersAsync();
+            if (!sellers.Any())
+            {
+                return NotFound();
+            }
+
             return Ok(sellers);
         }
 
@@ -26,6 +31,11 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> GetSellerById(Guid sellerId)
         {
             var seller = await _entityRepository.GetSellerByIdAsync(sellerId);
+            if (seller == null)
+            {
+                return NotFound();
+            }
+
             return Ok(seller);
         }
 
@@ -33,6 +43,11 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> GetCreatedProductsBySeller(Guid sellerId)
         {
             var products = await _entityRepository.GetCreatedProductsBySellerAsync(sellerId);
+            if (!products.Any())
+            {
+                return NotFound();
+            }
+
             return Ok(products);
         }
 
@@ -40,6 +55,11 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> GetAllCustomers()
         {
             var customers = await _entityRepository.GetAllCustomersAsync();
+            if (!customers.Any())
+            {
+                return NotFound();
+            }
+
             return Ok(customers);
         }
 
@@ -47,6 +67,10 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> GetCustomerById(Guid customerId)
         {
             var customer = await _entityRepository.GetCustomerByIdAsync(customerId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
             return Ok(customer);
         }
 
@@ -54,6 +78,10 @@ namespace JSON_Market.Controllers
         public async Task<IActionResult> GetOrderHistoryByCustomer(Guid customerId)
         {
             var history = await _entityRepository.GetOrderHistoryByCustomerAsync(customerId);
+            if (!history.Any())
+            {
+                return NotFound();
+            }
             return Ok(history);
         }
     }
