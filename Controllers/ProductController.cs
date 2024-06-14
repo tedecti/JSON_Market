@@ -36,15 +36,15 @@ namespace JSON_Market.Controllers
             return Ok(productMap);
         }
 
-        [HttpPost()]
-        public async Task<IActionResult> PostProduct([FromBody] CreateOrEditProductDto createProductDto, Guid sellerId)
+        [HttpPost("{sellerId}")]
+        public async Task<IActionResult> PostProduct([FromForm] CreateOrEditProductDto createProductDto, Guid sellerId)
         {
             var order = await _productRepository.CreateProductAsync(sellerId, createProductDto);
-            return Created();
+            return StatusCode(201);
         }
 
         [HttpPut("{productId}")]
-        public async Task<IActionResult> PutProduct([FromQuery] Guid productId, [FromBody] CreateOrEditProductDto editProductDto)
+        public async Task<IActionResult> PutProduct(Guid productId, [FromBody] CreateOrEditProductDto editProductDto)
         {
             var order = await _productRepository.EditProductAsync(productId, editProductDto);
             return NoContent();

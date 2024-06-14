@@ -14,11 +14,13 @@ public class ProductRepository : IProductRepository
 {
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IFileRepository _fileRepository;
 
-    public ProductRepository(AppDbContext context, IMapper mapper)
+    public ProductRepository(AppDbContext context, IMapper mapper, IFileRepository fileRepository)
     {
         _context = context;
         _mapper = mapper;
+        _fileRepository = fileRepository;
     }
 
     public async Task<List<Product>> GetAllProductsAsync()
@@ -46,6 +48,7 @@ public class ProductRepository : IProductRepository
         var product = await _context.Products.Where(p => p.Id == productId).FirstOrDefaultAsync();
         return product;
     }
+
     public async Task<List<Product>> GetAllProductsByIdsAsync(List<Guid> productIds)
     {
         var products = await _context.Products
@@ -56,6 +59,16 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product> CreateProductAsync(Guid sellerId, CreateOrEditProductDto createOrEditProductDto)
     {
+        var imgs = new List<string>();
+        foreach (var file in createOrEditProductDto.ImageUrls)
+        {
+            imgs.Add(await _fileRepository.SaveFile(file));
+        }
+        var seller = await _context.Sellers.FindAsync(sellerId);
+        if (seller == null)
+        {
+            throw new Exception("Продавец не найден");
+        }
         var newProduct = new Product()
         {
             Id = Guid.NewGuid(),
@@ -64,31 +77,47 @@ public class ProductRepository : IProductRepository
             Price = createOrEditProductDto.Price,
             CreatedAt = DateTime.UtcNow,
             Discount = createOrEditProductDto.Discount,
-            ImageUrls = createOrEditProductDto.ImageUrls,
+            ImageUrls = imgs.ToList(),
             SellerId = sellerId
         };
-        if (_context.Products == null)
-        {
-            Console.WriteLine("penis");
-        }
+        seller.CreatedProducts.Add(newProduct);
         _context.Products.Add(newProduct);
         await _context.SaveChangesAsync();
         return newProduct;
     }
+
     public async Task<Product> EditProductAsync(Guid productId, CreateOrEditProductDto createOrEditProductDto)
     {
         var existingProduct = await GetProductByIdAsync(productId);
-        if (existingProduct != null)
+
+        if (existingProduct == null)
         {
-            existingProduct.Title = createOrEditProductDto.Title;
-            existingProduct.Description = createOrEditProductDto.Description;
-            existingProduct.Price = createOrEditProductDto.Price;
-            existingProduct.Discount = createOrEditProductDto.Discount;
-            existingProduct.ImageUrls = createOrEditProductDto.ImageUrls; // TODO: сохранять/удалять старые фотки
-            await _context.SaveChangesAsync();
+            throw new ArgumentException("Нет такого продукта");
+            return null;
         }
+
+        var productImages = existingProduct.ImageUrls;
+        foreach (var img in productImages)
+        {
+            await _fileRepository.DeleteFileFromStorage(img);
+        }
+
+        var imgs = new List<string>();
+        foreach (var file in createOrEditProductDto.ImageUrls)
+        {
+            imgs.Add(await _fileRepository.SaveFile(file));
+        }
+
+        existingProduct.Title = createOrEditProductDto.Title;
+        existingProduct.Description = createOrEditProductDto.Description;
+        existingProduct.Price = createOrEditProductDto.Price;
+        existingProduct.Discount = createOrEditProductDto.Discount;
+        existingProduct.ImageUrls = productImages;
+
+        await _context.SaveChangesAsync();
         return existingProduct;
     }
+
     public async Task<bool> RemoveProductAsync(Guid productId)
     {
         var existingProduct = await GetProductByIdAsync(productId);
