@@ -1,6 +1,7 @@
 using JSON_Market.Data;
 using JSON_Market.Repository;
 using JSON_Market.Repository.Interfaces;
+using Microsoft.OpenApi.Models;
 
 namespace JSON_Market;
 
@@ -13,10 +14,20 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+        builder.Services.AddScoped<IFileRepository, FileRepository>();
+        builder.Services.AddScoped<IEntityRepository, EntityRepository>();
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v2",
+                Title = "JSON Market",
+                Description = "Test task for .NET Junior Developer",
+            });
+        });
         builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         var app = builder.Build();
