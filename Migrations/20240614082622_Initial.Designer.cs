@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JSON_Market.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240613134807_Initial")]
+    [Migration("20240614082622_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -37,10 +37,10 @@ namespace JSON_Market.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customer");
+                    b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("JSON_Market.Models.Order", b =>
+            modelBuilder.Entity("JSON_Market.Models.Order.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -53,10 +53,25 @@ namespace JSON_Market.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Order");
+                    b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("JSON_Market.Models.Product", b =>
+            modelBuilder.Entity("JSON_Market.Models.OrderProduct", b =>
+                {
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("OrderId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderProducts");
+                });
+
+            modelBuilder.Entity("JSON_Market.Models.Product.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -72,11 +87,7 @@ namespace JSON_Market.Migrations
                         .HasColumnType("smallint");
 
                     b.Property<List<string>>("ImageUrls")
-                        .IsRequired()
                         .HasColumnType("text[]");
-
-                    b.Property<Guid?>("OrderId")
-                        .HasColumnType("uuid");
 
                     b.Property<int>("Price")
                         .HasColumnType("integer");
@@ -89,11 +100,9 @@ namespace JSON_Market.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
-
                     b.HasIndex("SellerId");
 
-                    b.ToTable("Product");
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("JSON_Market.Models.Seller", b =>
@@ -107,10 +116,10 @@ namespace JSON_Market.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Seller");
+                    b.ToTable("Sellers");
                 });
 
-            modelBuilder.Entity("JSON_Market.Models.Order", b =>
+            modelBuilder.Entity("JSON_Market.Models.Order.Order", b =>
                 {
                     b.HasOne("JSON_Market.Models.Customer", "Customer")
                         .WithMany("OrderHistory")
@@ -121,12 +130,27 @@ namespace JSON_Market.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("JSON_Market.Models.Product", b =>
+            modelBuilder.Entity("JSON_Market.Models.OrderProduct", b =>
                 {
-                    b.HasOne("JSON_Market.Models.Order", null)
-                        .WithMany("Products")
-                        .HasForeignKey("OrderId");
+                    b.HasOne("JSON_Market.Models.Order.Order", "Order")
+                        .WithMany("OrderProducts")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
+                    b.HasOne("JSON_Market.Models.Product.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("JSON_Market.Models.Product.Product", b =>
+                {
                     b.HasOne("JSON_Market.Models.Seller", "Seller")
                         .WithMany("CreatedProducts")
                         .HasForeignKey("SellerId")
@@ -141,9 +165,9 @@ namespace JSON_Market.Migrations
                     b.Navigation("OrderHistory");
                 });
 
-            modelBuilder.Entity("JSON_Market.Models.Order", b =>
+            modelBuilder.Entity("JSON_Market.Models.Order.Order", b =>
                 {
-                    b.Navigation("Products");
+                    b.Navigation("OrderProducts");
                 });
 
             modelBuilder.Entity("JSON_Market.Models.Seller", b =>

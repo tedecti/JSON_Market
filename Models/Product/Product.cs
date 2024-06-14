@@ -1,4 +1,4 @@
-﻿namespace JSON_Market.Models;
+﻿namespace JSON_Market.Models.Product;
 
 public class Product
 {
@@ -8,7 +8,7 @@ public class Product
     public ushort Price { get; set; }
     public byte Discount { get; set; }
     public Guid SellerId { get; set; }
-    public Seller? Seller { get; set; }
+    public Seller.Seller Seller { get; set; }
     public DateTime CreatedAt { get; set; }
-    public List<string> ImageUrls { get; set; } = [];
+    public List<string>? ImageUrls { get; set; } = [];
 }
