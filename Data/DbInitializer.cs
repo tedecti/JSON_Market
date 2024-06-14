@@ -8,7 +8,7 @@ public static class DbInitializer
     public static void Initialize(AppDbContext context)
     {
         context.Database.EnsureCreated();
-        
+
         if (!context.Customers.Any() && !context.Sellers.Any())
         {
             var customers = new List<Customer>
@@ -17,7 +17,7 @@ public static class DbInitializer
                 new Customer { Id = Guid.NewGuid(), Name = "Kaplin" }
             };
             context.Customers.AddRange(customers);
-            
+
             var sellers = new List<Seller>
             {
                 new Seller { Id = Guid.NewGuid(), Name = "Artem"},

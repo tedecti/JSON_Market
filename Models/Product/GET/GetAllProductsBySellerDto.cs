@@ -3,5 +3,5 @@
 public class GetAllProductsBySellerDto
 {
     public string? Name { get; set; }
-    public List<GetAllProductsDto> Products { get; set; } 
+    public List<GetAllProductsDto> Products { get; set; }
 }

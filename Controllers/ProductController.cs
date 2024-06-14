@@ -27,7 +27,7 @@ namespace JSON_Market.Controllers
             var productsMap = _mapper.Map<GetAllProductsBySellerDto>(products);
             return Ok(productsMap);
         }
-        
+
         [HttpGet("{productId}")]
         public async Task<IActionResult> GetProductsById(Guid productId)
         {
@@ -35,21 +35,21 @@ namespace JSON_Market.Controllers
             var productMap = _mapper.Map<GetAllProductsDto>(product);
             return Ok(productMap);
         }
-        
+
         [HttpPost()]
         public async Task<IActionResult> PostProduct([FromBody] CreateOrEditProductDto createProductDto, Guid sellerId)
         {
             var order = await _productRepository.CreateProductAsync(sellerId, createProductDto);
             return Created();
         }
-        
+
         [HttpPut("{productId}")]
-        public async Task<IActionResult> PutProduct([FromQuery]Guid productId, [FromBody]CreateOrEditProductDto editProductDto)
+        public async Task<IActionResult> PutProduct([FromQuery] Guid productId, [FromBody] CreateOrEditProductDto editProductDto)
         {
             var order = await _productRepository.EditProductAsync(productId, editProductDto);
             return NoContent();
         }
-        
+
         [HttpDelete("{productId}")]
         public async Task<IActionResult> DeleteProduct(Guid productId)
         {

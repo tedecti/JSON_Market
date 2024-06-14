@@ -32,7 +32,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Order>()
             .HasMany(o => o.Products)
             .WithMany();
-        ;
     }
 
     public DbSet<Customer> Customers { get; set; } = default!;

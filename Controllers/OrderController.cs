@@ -27,28 +27,28 @@ namespace JSON_Market.Controllers
             var ordersMap = _mapper.Map<List<GetAllOrdersByCustomerDto>>(orders);
             return Ok(ordersMap);
         }
-        
+
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(Guid orderId)
         {
             var order = await _orderRepository.GetOrderByIdAsync(orderId);
             return Ok(order);
         }
-        
+
         [HttpPost("{customerId}")]
         public async Task<IActionResult> PostOrder(Guid customerId, [FromBody] List<Guid> productIds)
         {
             var order = await _orderRepository.CreateOrderAsync(customerId, productIds);
             return Created();
         }
-        
+
         [HttpPut("{customerId}")]
-        public async Task<IActionResult> PutOrder([FromQuery]Guid orderId, [FromBody] List<Guid> productIds)
+        public async Task<IActionResult> PutOrder([FromQuery] Guid orderId, [FromBody] List<Guid> productIds)
         {
             var order = await _orderRepository.EditOrderAsync(orderId, productIds);
             return NoContent();
         }
-        
+
         [HttpDelete("{orderId}")]
         public async Task<IActionResult> DeleteOrder(Guid orderId)
         {

@@ -31,7 +31,7 @@ public class ProductRepository : IProductRepository
     {
         var products = await _context.Products
             .Where(p => p.SellerId == sellerId)
-            .Include(p=>p.Seller)
+            .Include(p => p.Seller)
             .ToListAsync();
         var result = new GetAllProductsBySellerDto
         {
