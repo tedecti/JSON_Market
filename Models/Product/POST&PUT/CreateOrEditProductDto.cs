@@ -6,5 +6,5 @@ public class CreateOrEditProductDto
     public string? Description { get; set; }
     public ushort Price { get; set; }
     public byte Discount { get; set; }
-    public List<string> ImageUrls { get; set; } = [];
+    public List<IFormFile> ImageUrls { get; set; }
 }
