@@ -1,5 +1,7 @@
 ﻿using JSON_Market.Models;
+using JSON_Market.Models.Customer;
 using JSON_Market.Models.Product;
+using JSON_Market.Models.Seller;
 
 namespace JSON_Market.Data;
 
