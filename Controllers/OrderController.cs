@@ -20,19 +20,20 @@ namespace JSON_Market.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{userId}/customer")]
+        [HttpGet("{customerId}/customer")]
         public async Task<IActionResult> GetOrdersByCustomer(Guid customerId)
         {
             var orders = await _orderRepository.GetAllOrdersByCustomerAsync(customerId);
-            var ordersMap = _mapper.Map<List<GetAllOrdersByCustomerDto>>(orders);
+            var ordersMap = _mapper.Map<GetAllOrdersByCustomerDto>(orders);
             return Ok(ordersMap);
         }
 
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(Guid orderId)
         {
-            var order = await _orderRepository.GetOrderByIdAsync(orderId);
-            return Ok(order);
+            var order = await _orderRepository.GetOrderByIdForResponseAsync(orderId);
+            var orderMap = _mapper.Map<GetAllOrdersByCustomerDto>(order);
+            return Ok(orderMap);
         }
 
         [HttpPost("{customerId}")]
@@ -42,8 +43,8 @@ namespace JSON_Market.Controllers
             return Created();
         }
 
-        [HttpPut("{customerId}")]
-        public async Task<IActionResult> PutOrder([FromQuery] Guid orderId, [FromBody] List<Guid> productIds)
+        [HttpPut("{orderId}")]
+        public async Task<IActionResult> PutOrder(Guid orderId, [FromBody] List<Guid> productIds)
         {
             var order = await _orderRepository.EditOrderAsync(orderId, productIds);
             return NoContent();

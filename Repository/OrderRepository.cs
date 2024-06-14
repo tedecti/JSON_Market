@@ -1,6 +1,9 @@
 ﻿using JSON_Market.Data;
+using JSON_Market.Models;
 using JSON_Market.Models.Order;
+using JSON_Market.Models.Order.GET;
 using JSON_Market.Models.Product;
+using JSON_Market.Models.Product.GET;
 using JSON_Market.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging;
@@ -18,21 +21,63 @@ public class OrderRepository : IOrderRepository
         _productRepository = productRepository;
     }
 
-    public async Task<List<Order>> GetAllOrdersByCustomerAsync(Guid customerId)
+    public async Task<GetAllOrdersByCustomerDto> GetAllOrdersByCustomerAsync(Guid customerId)
     {
-        var orders = await _context.Orders
-            .Where(o => o.CustomerId == customerId)
-            .Include(o => o.Customer.Name)
-            .ToListAsync();
-        return orders;
+        var order = await _context.Orders
+            .Where(p => p.CustomerId == customerId)
+            .Include(o => o.Customer)
+            .Include(o => o.OrderProducts)
+            .ThenInclude(op => op.Product)
+            .FirstOrDefaultAsync();
+        var orderDto = new GetAllOrdersByCustomerDto()
+        {
+            Name = order.Customer?.Name,
+            Orders = order.OrderProducts.Select(op => new GetAllProductsDto
+            {
+                Title = op.Product.Title,
+                Description = op.Product.Description,
+                Price = op.Product.Price,
+                Discount = op.Product.Discount,
+                ImageUrls = op.Product.ImageUrls,
+                CreatedAt = op.Product.CreatedAt
+            }).ToList()
+        };
+        return orderDto;
     }
 
     public async Task<Order> GetOrderByIdAsync(Guid id)
     {
         var order = await _context.Orders
             .Where(p => p.Id == id)
+            .Include(o => o.Customer)
+            .Include(o => o.OrderProducts)
+            .ThenInclude(op => op.Product)
             .FirstOrDefaultAsync();
         return order;
+    }
+
+    public async Task<GetAllOrdersByCustomerDto> GetOrderByIdForResponseAsync(Guid id)
+    {
+        var order = await _context.Orders
+            .Where(p => p.Id == id)
+            .Include(o => o.Customer)
+            .Include(o => o.OrderProducts)
+            .ThenInclude(op => op.Product)
+            .FirstOrDefaultAsync();
+        var orderDto = new GetAllOrdersByCustomerDto()
+        {
+            Name = order.Customer?.Name,
+            Orders = order.OrderProducts.Select(op => new GetAllProductsDto
+            {
+                Title = op.Product.Title,
+                Description = op.Product.Description,
+                Price = op.Product.Price,
+                Discount = op.Product.Discount,
+                ImageUrls = op.Product.ImageUrls,
+                CreatedAt = op.Product.CreatedAt
+            }).ToList()
+        };
+        return orderDto;
     }
 
     public async Task<Order> CreateOrderAsync(Guid customerId, List<Guid> productIds)
@@ -43,12 +88,21 @@ public class OrderRepository : IOrderRepository
             throw new ArgumentException("Некоторые из переданных продуктов не найдены.");
         }
 
+        var newId = Guid.NewGuid();
         var newOrder = new Order()
         {
-            Id = Guid.NewGuid(),
+            Id = newId,
             CustomerId = customerId,
-            Products = products
+            OrderProducts = products.Select(p => new OrderProduct
+            {
+                OrderId = newId,
+                ProductId = p.Id
+            }).ToList()
         };
+
+        var customer = await _context.Customers.FindAsync(customerId);
+        customer.OrderHistory.Add(newOrder);
+
         _context.Orders.Add(newOrder);
         await _context.SaveChangesAsync();
 
@@ -69,13 +123,18 @@ public class OrderRepository : IOrderRepository
             throw new ArgumentException("Заказ не найден.");
         }
 
-        var productsToRemove = existingOrder.Products
-            .Where(p => !products.Select(np => np.Id).Contains(p.Id))
-            .ToList();
-        var existingProductIds = existingOrder.Products.Select(p => p.Id).ToList();
-        var productsToAdd = products
-            .Where(p => !existingProductIds.Contains(p.Id))
-            .ToList();
+        var existingOrderProducts = await _context.OrderProducts
+            .Where(op => op.OrderId == orderId)
+            .ToListAsync();
+        _context.OrderProducts.RemoveRange(existingOrderProducts);
+
+        var newOrderProducts = products.Select(p => new OrderProduct
+        {
+            OrderId = orderId,
+            ProductId = p.Id
+        }).ToList();
+        _context.OrderProducts.AddRange(newOrderProducts);
+
         await _context.SaveChangesAsync();
         return existingOrder;
     }
