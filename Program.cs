@@ -16,7 +16,17 @@ public class Program
         builder.Services.AddScoped<IOrderRepository, OrderRepository>();
         builder.Services.AddScoped<IFileRepository, FileRepository>();
         builder.Services.AddScoped<IEntityRepository, EntityRepository>();
-
+    
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+            
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
@@ -46,10 +56,19 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseCors();
+        
         app.UseAuthorization();
 
         app.MapControllers();
 
         app.Run();
     }
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Program>();
+                webBuilder.UseUrls("http://*:8080"); // Добавьте эту строку
+            });
 }
