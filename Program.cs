@@ -1,7 +1,10 @@
 using JSON_Market.Data;
 using JSON_Market.Repository;
 using JSON_Market.Repository.Interfaces;
+using JSON_Market.Services;
+using JSON_Market.Services.Interfaces;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 
 namespace JSON_Market;
 
@@ -16,6 +19,9 @@ public class Program
         builder.Services.AddScoped<IOrderRepository, OrderRepository>();
         builder.Services.AddScoped<IFileRepository, FileRepository>();
         builder.Services.AddScoped<IEntityRepository, EntityRepository>();
+
+        builder.Services.AddSingleton<IConnectionMultiplexer>(
+            ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")));
     
         builder.Services.AddCors(options =>
         {
@@ -26,6 +32,12 @@ public class Program
                     .AllowAnyHeader();
             });
         });
+
+        builder.Services.AddHttpClient("AuthMicroservice", client =>
+        {
+            client.BaseAddress = new Uri("http://localhost:8081/api/auth");
+        });
+        builder.Services.AddTransient<IAuthService, AuthService>();
             
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
@@ -69,6 +81,6 @@ public class Program
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Program>();
-                webBuilder.UseUrls("http://*:8080"); // Добавьте эту строку
+                webBuilder.UseUrls("http://*:8080");
             });
 }
