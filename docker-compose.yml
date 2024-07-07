@@ -1,0 +1,26 @@
+services:
+  dotnet:
+    image: dotnet:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - backend-network
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - /var/lib/redis/dаta:/root/redis
+      - /var/lib/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD=psswrd
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=16
+
+networks:
+  backend-network:
+    driver: bridge
